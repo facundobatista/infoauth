@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+
+# Copyright 2018 Facundo Batista
+#
+# This program is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 3, as published
+# by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranties of
+# MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR
+# PURPOSE.  See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# For further info, check  https://github.com/facundobatista/infoauth
+
+"""Script to run the 'infoauth' utility."""
+
+import os
+import sys
+
+USAGE = """
+Usage: 
+    infoauth show <filepath>
+    infoauth create <filepath> key1=value1 [key2=value2 [...]]
+"""
+
+# small hack to allow fades to be run directly from the project, using code 
+# from project itself, not anything already installed in the system
+parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0])))
+if os.path.basename(parent_dir).startswith('infoauth'):
+    # inside the project or an opened tarball!!
+    sys.path.insert(0, parent_dir)
+
+from infoauth import _show, _create
+
+def die():
+    print(USAGE)
+    sys.exit()
+
+entry_points = {
+    'show': _show,
+    'create': _create,
+}
+
+if len(sys.argv) < 2:
+    die()
+
+if sys.argv[1] == 'show':
+    if len(sys.argv) != 3:
+        die()
+    try:
+        _show(sys.argv[2])
+    except Error as err:
+        print("ERROR:", err)
+elif sys.argv[1] == 'create':
+    if len(sys.argv) < 4:
+        die()
+    try:
+        _create(sys.argv[2], sys.argv[2:])
+    except Error as err:
+        print("ERROR:", err)
+else:
+    die()

@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# Copyright 2018 Facundo Batista
+
+set -eu
+
+if [ $# -ne 0 ]; then
+    TARGET_TESTS="$@"
+else
+    TARGET_TESTS="infoauth tests"
+fi
+
+fades -r requirements-tests.txt -d nose -x nosetests -s -v $TARGET_TESTS
