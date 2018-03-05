@@ -9,8 +9,6 @@ It does:
 
 - Change the file to read-only, and only by yourself
 
-- Prevent overwriting a previous file
-
 - Load the tokens from disk
 
 In which case this module is useful? Say you have a script or program that

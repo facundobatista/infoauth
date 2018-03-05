@@ -16,6 +16,7 @@
 
 """Main code."""
 
+import os
 import pickle
 import zlib
 
@@ -39,6 +40,7 @@ def dump(data, filepath):
     compressed = zlib.compress(pickled)
     with open(filepath, 'wb') as fh:
         fh.write(compressed)
+    os.chmod(filepath, 0o400)  # read only for owner alone
 
 
 def _show(filepath):

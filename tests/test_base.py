@@ -146,3 +146,11 @@ class AsModuleTestCase(unittest.TestCase):
         # load and compare
         retrieved_data = load(tempfile)
         self.assertEqual(original_data, retrieved_data)
+
+    def test_permissions_after_saving(self):
+        tempfile = get_temp_file(self)
+        assert (os.stat(tempfile).st_mode & 0o777) != 0o400
+
+        # dump some stuff and check permission
+        dump({'foo': 2}, tempfile)
+        self.assertEqual((os.stat(tempfile).st_mode & 0o777), 0o400)
