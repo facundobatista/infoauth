@@ -20,9 +20,11 @@
 
 from distutils.core import setup
 
+VERSION = '1.4'
+
 setup(
     name='infoauth',
-    version='1.3',
+    version=VERSION,
     license='GPL-3',
     author='Facundo Batista',
     author_email='facundo@taniquetil.com.ar',
