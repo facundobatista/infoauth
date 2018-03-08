@@ -22,7 +22,7 @@ from distutils.core import setup
 
 setup(
     name='infoauth',
-    version=open('version.txt', 'rt', encoding='ascii').read().strip(),
+    version='1.3',
     license='GPL-3',
     author='Facundo Batista',
     author_email='facundo@taniquetil.com.ar',
@@ -32,12 +32,6 @@ setup(
     packages=["infoauth"],
     scripts=["bin/infoauth"],
     keywords="info auth tokens",  # Keywords to get found easily on PyPI results,etc.
-    install_requires=['setuptools'],
-    tests_require=['nose', 'flake8', 'pep257', 'rst2html5'],  # What unittests require.
-    python_requires='>=3.3',  # Minimum Python version supported.
-    #extras_require={
-    #    'setuptools': 'setuptools',
-    #},
 
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[

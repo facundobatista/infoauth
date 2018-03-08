@@ -21,10 +21,6 @@ import pickle
 import zlib
 
 
-class Error(Exception):
-    """Custom exception to signal errors in cmd line usage."""
-
-
 def load(filepath):
     """Load slightly scrambled data from filepath."""
     with open(filepath, 'rb') as fh:
@@ -45,13 +41,7 @@ def dump(data, filepath):
 
 def _show(filepath):
     """Show the content of the file to stdout."""
-    try:
-        data = load(filepath)
-    except OSError as err:
-        print("ERROR:", err)
-        return
-
-    # show
+    data = load(filepath)
     for key, value in sorted(data.items()):
         print("{}: {!r}".format(key, value))
 
@@ -63,8 +53,7 @@ def _create(filepath, data_as_pair_kv):
         try:
             k, v = map(str.strip, k_eq_v.split("=", maxsplit=1))
         except ValueError:
-            print("ERROR: bad option", repr(k_eq_v))
-            return
+            raise ValueError("ERROR: bad option " + repr(k_eq_v))
         data_as_dict[k] = v
 
     # save!

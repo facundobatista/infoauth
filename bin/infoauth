@@ -53,14 +53,14 @@ if sys.argv[1] == 'show':
         die()
     try:
         _show(sys.argv[2])
-    except Error as err:
+    except Exception as err:
         print("ERROR:", err)
 elif sys.argv[1] == 'create':
     if len(sys.argv) < 4:
         die()
     try:
-        _create(sys.argv[2], sys.argv[2:])
-    except Error as err:
+        _create(sys.argv[2], sys.argv[3:])
+    except Exception as err:
         print("ERROR:", err)
 else:
     die()

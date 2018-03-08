@@ -89,14 +89,9 @@ class CmdLineTestCase(unittest.TestCase):
         """))
 
     def test_show_missing_file(self):
-        fake_stdout = io.StringIO()
-        with patch('sys.stdout', fake_stdout):
+        with self.assertRaises(OSError) as exc:
             _show('test-missing')
-
-        result = fake_stdout.getvalue()
-        self.assertEqual(result, dedent("""\
-            ERROR: [Errno 2] No such file or directory: 'test-missing'
-        """))
+        self.assertEqual(str(exc.exception), "[Errno 2] No such file or directory: 'test-missing'")
 
     def test_create_ok_simple(self):
         tempfile = get_temp_file(self)
@@ -115,14 +110,9 @@ class CmdLineTestCase(unittest.TestCase):
         self.assertEqual(saved, {'foo': '57', 'bar': 'bleh'})
 
     def test_create_bad_option_no_equal(self):
-        fake_stdout = io.StringIO()
-        with patch('sys.stdout', fake_stdout):
+        with self.assertRaises(ValueError) as exc:
             _create('nomatterpath', ['foo57', 'bar=bleh'])
-
-        result = fake_stdout.getvalue()
-        self.assertEqual(result, dedent("""\
-            ERROR: bad option 'foo57'
-        """))
+        self.assertEqual(str(exc.exception), "ERROR: bad option 'foo57'")
 
     def test_create_weird_equals(self):
         tempfile = get_temp_file(self)
