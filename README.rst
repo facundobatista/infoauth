@@ -18,8 +18,8 @@ public, so with this module you do::
 
     tokens = infoauth.load(os.path.expanduser("~/.my-tokens"))
 
-Note that the user will remain only readable by yourself, and not in the
-project file (so you don't have the risk of sharing it by accident).
+Note that the file will remain only readable by yourself, and not in the
+project directory (so you don't have the risk of sharing it by accident).
 
 **WARNING**: it does NOT protect your secrets with any key or anything, this
 module does NOT secure your secrets in any way. Yes, the tokens are scrambled
