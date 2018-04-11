@@ -40,11 +40,6 @@ def die():
     print(USAGE)
     sys.exit()
 
-entry_points = {
-    'show': _show,
-    'create': _create,
-}
-
 if len(sys.argv) < 2:
     die()
 
