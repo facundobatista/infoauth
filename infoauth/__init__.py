@@ -1,4 +1,4 @@
-# Copyright 2018 Facundo Batista
+# Copyright 2018-2025 Facundo Batista
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 3, as published
@@ -34,6 +34,8 @@ def dump(data, filepath):
     """Dump data to filepath slightly scrambled."""
     pickled = pickle.dumps(data)
     compressed = zlib.compress(pickled)
+    if os.path.exists(filepath):
+        os.chmod(filepath, 0o600)  # allow writing to be able to dump, will go back to RO
     with open(filepath, 'wb') as fh:
         fh.write(compressed)
     os.chmod(filepath, 0o400)  # read only for owner alone

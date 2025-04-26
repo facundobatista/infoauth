@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2018 Facundo Batista
+# Copyright 2018-2025 Facundo Batista
 
 set -eu
 
@@ -10,4 +10,4 @@ else
     TARGET_TESTS="infoauth tests"
 fi
 
-PYTHONPATH=tests fades -r requirements-tests.txt -d nose -x nosetests -s -v $TARGET_TESTS
+fades -r requirements-tests.txt -x python -m pytest -sv $TARGET_TESTS

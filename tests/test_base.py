@@ -1,4 +1,4 @@
-# Copyright 2018 Facundo Batista
+# Copyright 2018-2025 Facundo Batista
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License version 3, as published
@@ -20,27 +20,19 @@ import io
 import os
 import random
 import string
-import tempfile
-import unittest
 from textwrap import dedent
 from unittest.mock import patch
+
+import pytest
 
 from infoauth import _create, _show, dump, load
 
 
-def get_temp_file(testcase):
-    """Provide a temporary file."""
-    descriptor, filepath = tempfile.mkstemp(prefix="test-temp-file")
-    os.close(descriptor)
-    testcase.addCleanup(lambda: os.path.exists(filepath) and os.remove(filepath))
-    return filepath
+class TestCmdLine:
 
-
-class CmdLineTestCase(unittest.TestCase):
-
-    def test_show_ok_one_string(self):
+    def test_show_ok_one_string(self, tmp_path):
         # create a sample file
-        tempfile = get_temp_file(self)
+        tempfile = tmp_path / "tempfile"
         data = {'foo': 'bar'}
         dump(data, tempfile)
 
@@ -50,13 +42,13 @@ class CmdLineTestCase(unittest.TestCase):
             _show(tempfile)
 
         result = fake_stdout.getvalue()
-        self.assertEqual(result, dedent("""\
+        assert result == dedent("""\
             foo: 'bar'
-        """))
+        """)
 
-    def test_show_ok_one_other_data_type(self):
+    def test_show_ok_one_other_data_type(self, tmp_path):
         # create a sample file
-        tempfile = get_temp_file(self)
+        tempfile = tmp_path / "tempfile"
         data = {'foo': 55}
         dump(data, tempfile)
 
@@ -66,13 +58,13 @@ class CmdLineTestCase(unittest.TestCase):
             _show(tempfile)
 
         result = fake_stdout.getvalue()
-        self.assertEqual(result, dedent("""\
+        assert result == dedent("""\
             foo: 55
-        """))
+        """)
 
-    def test_show_ok_several(self):
+    def test_show_ok_several(self, tmp_path):
         # create a sample file
-        tempfile = get_temp_file(self)
+        tempfile = tmp_path / "tempfile"
         data = {'foo': 55, 'bar': 'bleh', 'another': 88}
         dump(data, tempfile)
 
@@ -82,51 +74,60 @@ class CmdLineTestCase(unittest.TestCase):
             _show(tempfile)
 
         result = fake_stdout.getvalue()
-        self.assertEqual(result, dedent("""\
+        assert result == dedent("""\
             another: 88
             bar: 'bleh'
             foo: 55
-        """))
+        """)
 
     def test_show_missing_file(self):
-        with self.assertRaises(OSError) as exc:
+        with pytest.raises(OSError) as exc:
             _show('test-missing')
-        self.assertEqual(str(exc.exception), "[Errno 2] No such file or directory: 'test-missing'")
+        assert str(exc.value) == "[Errno 2] No such file or directory: 'test-missing'"
 
-    def test_create_ok_simple(self):
-        tempfile = get_temp_file(self)
+    def test_create_ok_simple(self, tmp_path):
+        tempfile = tmp_path / "tempfile"
         _create(tempfile, ['foo=57'])
 
         # check
         saved = load(tempfile)
-        self.assertEqual(saved, {'foo': '57'})
+        assert saved == {'foo': '57'}
 
-    def test_create_ok_several(self):
-        tempfile = get_temp_file(self)
+    def test_create_ok_several(self, tmp_path):
+        tempfile = tmp_path / "tempfile"
         _create(tempfile, ['foo=57', 'bar=bleh'])
 
         # check
         saved = load(tempfile)
-        self.assertEqual(saved, {'foo': '57', 'bar': 'bleh'})
+        assert saved == {'foo': '57', 'bar': 'bleh'}
 
     def test_create_bad_option_no_equal(self):
-        with self.assertRaises(ValueError) as exc:
+        with pytest.raises(ValueError) as exc:
             _create('nomatterpath', ['foo57', 'bar=bleh'])
-        self.assertEqual(str(exc.exception), "ERROR: bad option 'foo57'")
+        assert str(exc.value) == "ERROR: bad option 'foo57'"
 
-    def test_create_weird_equals(self):
-        tempfile = get_temp_file(self)
+    def test_create_weird_equals(self, tmp_path):
+        tempfile = tmp_path / "tempfile"
         _create(tempfile, ['foo=', '=bleh', 'a=b=c'])
 
         # check
         saved = load(tempfile)
-        self.assertEqual(saved, {'foo': '', '': 'bleh', 'a': 'b=c'})
+        assert saved == {'foo': '', '': 'bleh', 'a': 'b=c'}
+
+    def test_create_repeated(self, tmp_path):
+        tempfile = tmp_path / "tempfile"
+        _create(tempfile, ['foo=57'])
+        _create(tempfile, ['foo=59'])
+
+        # check
+        saved = load(tempfile)
+        assert saved == {'foo': '59'}
 
 
-class AsModuleTestCase(unittest.TestCase):
+class TestAsModule:
 
-    def test_sanity_sequence(self):
-        tempfile = get_temp_file(self)
+    def test_sanity_sequence(self, tmp_path):
+        tempfile = tmp_path / "tempfile"
 
         # dump random stuff
         numbers = [random.randint(-3, 200) for _ in range(len(string.ascii_letters))]
@@ -135,12 +136,22 @@ class AsModuleTestCase(unittest.TestCase):
 
         # load and compare
         retrieved_data = load(tempfile)
-        self.assertEqual(original_data, retrieved_data)
+        assert original_data == retrieved_data
 
-    def test_permissions_after_saving(self):
-        tempfile = get_temp_file(self)
+    def test_permissions_after_saving(self, tmp_path):
+        tempfile = tmp_path / "tempfile"
+        tempfile.touch()
         assert (os.stat(tempfile).st_mode & 0o777) != 0o400
 
         # dump some stuff and check permission
         dump({'foo': 2}, tempfile)
-        self.assertEqual((os.stat(tempfile).st_mode & 0o777), 0o400)
+        assert (os.stat(tempfile).st_mode & 0o777) == 0o400
+
+    def test_create_repeated(self, tmp_path):
+        tempfile = tmp_path / "tempfile"
+        dump({'foo': 2}, tempfile)
+        dump({'foo': 3}, tempfile)
+
+        # check
+        saved = load(tempfile)
+        assert saved == {'foo': 3}
